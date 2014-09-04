@@ -130,8 +130,8 @@ var setupNewIndex = function(){
 	}
 
 	var deferred = q.defer();
-
-	fs.readFile(path.resolve(newMapping), function(err, data){
+	fs.readFile(newMapping, function(err, data){
+		console.log(err);
 		data = data.toString();
 		var json;
 		try {
@@ -146,16 +146,50 @@ var setupNewIndex = function(){
 			process.exit();
 		}
 
-		return client.indices.putMapping({
-			index: toIndex,
-			body: json
+		client.indices.exists({
+			index: toIndex
+		})
+		.then(function(exists){
+			if(exists){
+				return q.resolve();
+			}
+
+			return client.indices.create({
+				index: toIndex
+			});
 		})
 		.then(function(){
-			logger.error({
-				message: 'mapping updated'
+
+			return client.indices.close({
+				index: toIndex
+			})
+			.then(function(){
+				logger.info({
+					message: 'indexed closed'
+				});
+				return client.indices.putSettings({
+					index: toIndex,
+					body: json
+				})
+				.then(function(){
+					logger.info({
+						message: 'mapping updated'
+					});
+				});
+			})
+			.then(function(){
+				return client.indices.open({
+					index: toIndex
+				})
+				.then(function(){
+					logger.info({
+						message: 'indexed re-opened'
+					});
+					return deferred.resolve(json);
+				});
 			});
-			return deferred.resolve(json);
-		}, function(err){
+		})
+		.then(undefined, function(err){
 			logger.error({
 				message: 'failed to update mapping',
 				data: {
@@ -163,16 +197,16 @@ var setupNewIndex = function(){
 				}
 			});
 			process.exit();
-		});
+		})
 	});
 
 	return deferred.promise;
 };
 
-getBatch(batchSize, 0);
-
 setupNewIndex()
 .then(function(){
+
+	getBatch(batchSize, 0);
 	batchDeferred.promise
 	.then(function(){
 		logger.info({
