@@ -1,0 +1,25 @@
+{
+  "name": "es-migrator",
+  "version": "0.0.1",
+  "description": "Migrate script for Elasticsearch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seanmcgary/es-migrator.git"
+  },
+  "author": "Sean McGary <sean@seanmcgary.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seanmcgary/es-migrator/issues"
+  },
+  "dependencies": {
+    "q": "~1.0.1",
+    "lodash": "~2.4.1",
+    "elasticsearch": "~2.4.1",
+    "optimist": "~0.6.1",
+    "logwrangler": "~0.1.5"
+  }
+}
