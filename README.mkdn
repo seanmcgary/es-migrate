@@ -1,0 +1,3 @@
+## ES Migrate
+
+A commandline utility to migrate one Elasticsearch index to another.
