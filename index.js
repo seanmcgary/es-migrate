@@ -151,42 +151,19 @@ var setupNewIndex = function(){
 		})
 		.then(function(exists){
 			if(exists){
-				return q.resolve();
+				return deferred.resolve();
 			}
 
-			return client.indices.create({
+			var createPayload = {
 				index: toIndex
-			});
-		})
-		.then(function(){
+			};
+			if(json){
+				createPayload.body = json;
+			}
 
-			return client.indices.close({
-				index: toIndex
-			})
+			return client.indices.create(createPayload)
 			.then(function(){
-				logger.info({
-					message: 'indexed closed'
-				});
-				return client.indices.putSettings({
-					index: toIndex,
-					body: json
-				})
-				.then(function(){
-					logger.info({
-						message: 'mapping updated'
-					});
-				});
-			})
-			.then(function(){
-				return client.indices.open({
-					index: toIndex
-				})
-				.then(function(){
-					logger.info({
-						message: 'indexed re-opened'
-					});
-					return deferred.resolve(json);
-				});
+				return deferred.resolve(json);
 			});
 		})
 		.then(undefined, function(err){
